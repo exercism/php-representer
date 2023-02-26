@@ -1,0 +1,40 @@
+{
+    "name": "exercism/php-representer",
+    "description": "A normalizing representer for Exercism's PHP track.",
+    "version": "0.1.0",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": "^8.1",
+        "symfony/console": "^6.2",
+        "nikic/php-parser": "^4.15",
+        "psr/log": "^3.0"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.9",
+        "phpunit/phpunit": "^9.5",
+        "squizlabs/php_codesniffer": "^3.7",
+        "doctrine/coding-standard": "^11.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Tests\\": "phpunit-tests"
+        }
+    },
+    "scripts": {
+        "phpstan": "phpstan analyse src tests --configuration phpstan.neon --memory-limit=2G",
+        "test": "phpunit",
+        "lint": "phpcs",
+        "lint:fix": "phpcbf"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

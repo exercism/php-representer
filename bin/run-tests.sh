@@ -25,10 +25,10 @@ for test_dir in tests/*; do
     expect_error="${test_dir_path}/.expect-error"
 
     bin/run.sh "${test_dir_name}" "${test_dir_path}" "${test_dir_path}"
-    exit_code=$?
+    test_exit_code=$?
 
     if [[ -f "${expect_error}" ]]; then
-        if [[ $exit_code -eq 0 ]]; then
+        if [[ $test_exit_code -eq 0 ]]; then
             echo 'Expected non-zero exit code'
             exit_code=1
         fi

@@ -1,2 +1,8 @@
-module Leap
-let isLeapYear year = year % 4 = 0
+// file: /opt/representer/tests/example-leading-trailing-empty-lines/Leap.php
+class C0
+{
+    public static function isLeapYear($v0)
+    {
+        return $v0 % 4 === 0;
+    }
+}

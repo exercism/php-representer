@@ -1,2 +1,10 @@
-module Leap!#
-let@213 isLeapYear year = year %#@ 4 =
+// file: /opt/representer/tests/example-syntax-error/Leap.php
+<?php
+
+class Leap!#
+{
+    public static213 function isLeapYear($year)
+    {
+        return $year %#@ 4 =;
+    }
+}

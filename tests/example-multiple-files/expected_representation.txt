@@ -1,6 +1,17 @@
-module Leap
-open Helpers
-let isLeapYear year = mod year 4 = 0
-
-module Helpers
-let mod x y = x % y
+// file: /opt/representer/tests/example-multiple-files/Leap.php
+use Helpers;
+class C0
+{
+    public static function isLeapYear($v0)
+    {
+        return Helpers::mod($v0, 4) === 0;
+    }
+}
+// file: /opt/representer/tests/example-multiple-files/Helpers.php
+class C1
+{
+    public static function mod($v1, $v2)
+    {
+        return $v1 % $v2;
+    }
+}

@@ -1,2 +1,8 @@
+.idea/
+build/
+vendor/
+.phpcs-cache
+.phpunit.result.cache
+tests/*/representation.json
 tests/*/representation.txt
 tests/*/mapping.json
