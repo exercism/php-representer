@@ -62,7 +62,7 @@ class DirectoryRepresenter
                 throw new RuntimeException($solutionPath . ': Unable to read file');
             }
 
-            $filesRepresentation .= '// file: ' . $solutionPath . PHP_EOL;
+            $filesRepresentation .= '// file: ' . $solution . PHP_EOL;
             $filesRepresentation .= $representer->represent($code) . PHP_EOL;
         }
 

@@ -1,4 +1,4 @@
-// file: /opt/representer/tests/example-syntax-error/Leap.php
+// file: Leap.php
 <?php
 
 class Leap!#

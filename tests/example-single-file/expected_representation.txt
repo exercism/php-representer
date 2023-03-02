@@ -1,4 +1,4 @@
-// file: /opt/representer/tests/example-single-file/Leap.php
+// file: Leap.php
 class C0
 {
     public static function isLeapYear($v0)
