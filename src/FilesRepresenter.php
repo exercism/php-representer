@@ -31,7 +31,7 @@ class FilesRepresenter
         private AbstractLogger $logger = new NullLogger(),
     ) {
         $this->parser        = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
-        $this->prettyPrinter = new Standard();
+        $this->prettyPrinter = new NormalizedPrinter();
     }
 
     public function represent(string $code): string
@@ -57,7 +57,7 @@ class FilesRepresenter
         $visitor   = new NodeVisitor($this->mapping);
         $traverser = new NodeTraverser();
         $traverser->addVisitor($visitor);
-        $traverser->traverse($ast);
+        $ast = $traverser->traverse($ast);
 
         $this->logger->debug(LazyString::fromCallable(
             static fn () => 'AST After normalization: ' . (new NodeDumper())->dump($ast)
