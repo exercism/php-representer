@@ -29,7 +29,7 @@ class StripCommentTest extends RepresenterTest
             return "Hello World!";
         }
         EOF,
-            '{"fn0":"helloWorld"}',
+            '{"fn0":"helloworld"}',
         );
     }
 }

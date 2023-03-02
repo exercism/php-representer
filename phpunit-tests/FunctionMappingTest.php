@@ -48,7 +48,7 @@ class FunctionMappingTest extends RepresenterTest
             }
             CODE;
 
-        $this->assertSameRepresentationWithMapping($codeA, $codeB, '{"fn0":"helloWorldA"}', '{"fn0":"helloWorldB"}');
+        $this->assertSameRepresentationWithMapping($codeA, $codeB, '{"fn0":"helloworlda"}', '{"fn0":"helloworldb"}');
     }
 
     public function testDoesNotRenameCoreFunctions(): void
@@ -61,6 +61,42 @@ class FunctionMappingTest extends RepresenterTest
         $this->assertRepresentation(
             $code,
             'echo implode(\' \', array_map(\'strtolower\', [\'Hello\', \'World\']));',
+            '{}',
+        );
+    }
+
+    public function testCaseInsensitiveFunctions(): void
+    {
+        $code = <<<'CODE'
+            <?php
+            function A() {}
+            a();
+            CODE;
+
+        $this->assertRepresentation(
+            $code,
+            <<<'CODE'
+            function fn0()
+            {
+            }
+            fn0();
+            CODE,
+            '{"fn0":"a"}',
+        );
+    }
+
+    public function testCaseInsensitiveNativeFunctions(): void
+    {
+        $code = <<<'CODE'
+            <?php
+            FunCtioN_ExiStS();
+            CODE;
+
+        $this->assertRepresentation(
+            $code,
+            <<<'CODE'
+            function_exists();
+            CODE,
             '{}',
         );
     }

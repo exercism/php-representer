@@ -11,6 +11,7 @@ use function count;
 use function get_defined_functions;
 use function json_encode;
 use function ksort;
+use function mb_strtolower;
 
 use const JSON_FORCE_OBJECT;
 use const JSON_THROW_ON_ERROR;
@@ -51,6 +52,8 @@ class Mapping
 
     public function addFunction(string $name): string
     {
+        // TRANSFORM: Function names are case-insensitive in PHP
+        $name = mb_strtolower($name);
         // Do not rename built-in functions, functions_exists() includes user-defined functions
         if (array_key_exists($name, $this->internalFunctions)) {
             return $name;

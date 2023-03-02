@@ -29,6 +29,6 @@ class HelloWorldTest extends RepresenterTest
         }
         EOF
         , $result);
-        $this->assertEquals('{"fn0":"helloWorld"}', $mapping->toJson());
+        $this->assertEquals('{"fn0":"helloworld"}', $mapping->toJson());
     }
 }
