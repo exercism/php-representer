@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App;
 
 use PhpParser\Node;
-use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\Variable;
@@ -98,9 +97,8 @@ class NodeVisitor extends NodeVisitorAbstract
             $this->replaceClassName($node);
         } elseif ($node instanceof New_) {
             $this->replaceNewClassName($node);
-        } elseif ($node instanceof Array_) {
-            // TRANSFORM: Use short array syntax
-            $node->setAttribute('kind', Array_::KIND_SHORT);
+        } elseif ($node instanceof Node\Stmt\InlineHTML) {
+            return NodeTraverser::DONT_TRAVERSE_CHILDREN;
         }
 
         return null;
@@ -113,6 +111,11 @@ class NodeVisitor extends NodeVisitorAbstract
     {
         // TRANSFORM: Remove empty statements from representation
         if ($node instanceof Node\Stmt\Nop) {
+            return NodeTraverser::REMOVE_NODE;
+        }
+
+        // TRANSFORM: Remove inline HTML from representation
+        if ($node instanceof Node\Stmt\InlineHTML) {
             return NodeTraverser::REMOVE_NODE;
         }
 
