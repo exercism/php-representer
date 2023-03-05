@@ -25,7 +25,7 @@ class HelloWorldTest extends RepresenterTest
         $this->assertEquals(<<<'EOF'
         function fn0()
         {
-            return "Hello World!";
+            return 'Hello World!';
         }
         EOF
         , $result);

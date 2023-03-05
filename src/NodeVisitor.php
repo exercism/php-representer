@@ -4,17 +4,25 @@ declare(strict_types=1);
 
 namespace App;
 
+use LogicException;
 use PhpParser\Node;
+use PhpParser\Node\Expr\BinaryOp\Concat;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
+use PhpParser\Node\Scalar\Encapsed;
+use PhpParser\Node\Scalar\EncapsedStringPart;
+use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Function_;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 
+use function array_map;
+use function array_shift;
+use function assert;
 use function is_string;
 
 /**
@@ -80,6 +88,84 @@ class NodeVisitor extends NodeVisitorAbstract
     }
 
     /**
+     * TRANSFORM: All strings are single quotes
+     */
+    private function normalizeString(String_ $string): String_|null
+    {
+        switch ($string->getAttribute('kind')) {
+            case String_::KIND_NOWDOC:
+                $string->setAttribute('kind', String_::KIND_SINGLE_QUOTED);
+
+                return $string;
+
+            case String_::KIND_SINGLE_QUOTED:
+                return null;
+
+            case String_::KIND_HEREDOC:
+                $string->setAttribute('kind', String_::KIND_SINGLE_QUOTED);
+
+                return $string;
+
+            case String_::KIND_DOUBLE_QUOTED:
+                $string->setAttribute('kind', String_::KIND_SINGLE_QUOTED);
+
+                return $string;
+        }
+
+        throw new LogicException('Invalid string kind: `' . $string->getAttribute('kind') . '`.');
+    }
+
+    /**
+     * TRANSFORM: All encapsed strings are single quotes concatenation
+     */
+    private function normalizeEncapsedString(Encapsed $string): Node
+    {
+        $parts = array_map(
+            static fn (Node $part) => $part instanceof EncapsedStringPart
+                ? new String_($part->value, ['kind' => String_::KIND_SINGLE_QUOTED])
+                : $part,
+            $string->parts,
+        );
+
+        $left = array_shift($parts);
+        assert($left !== null, 'Encapsed string had 0 part.');
+        while ($right = array_shift($parts)) {
+            $left = new Concat($left, $right);
+        }
+
+        return $left;
+    }
+
+    /**
+     * TRANSFORM: Simplify useless concat such as `'a' . 'b'` => `'ab'`
+     */
+    private function simplifyUselessConcat(Concat $concat): String_|null
+    {
+        if ($concat->left instanceof Concat) {
+            $simplified = $this->simplifyUselessConcat($concat->left);
+            if ($simplified !== null) {
+                $concat->left = $simplified;
+            }
+        }
+
+        if ($concat->right instanceof Concat) {
+            $simplified = $this->simplifyUselessConcat($concat->right);
+            if ($simplified !== null) {
+                $concat->right = $simplified;
+            }
+        }
+
+        if ($concat->left instanceof String_ && $concat->right instanceof String_) {
+            return new String_(
+                $concat->left->value . $concat->right->value,
+                ['kind' => String_::KIND_SINGLE_QUOTED],
+            );
+        }
+
+        return null;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function enterNode(Node $node)
@@ -97,6 +183,12 @@ class NodeVisitor extends NodeVisitorAbstract
             $this->replaceClassName($node);
         } elseif ($node instanceof New_) {
             $this->replaceNewClassName($node);
+        } elseif ($node instanceof String_) {
+            return $this->normalizeString($node);
+        } elseif ($node instanceof Encapsed) {
+            return $this->normalizeEncapsedString($node);
+        } elseif ($node instanceof Concat) {
+            return $this->simplifyUselessConcat($node);
         } elseif ($node instanceof Node\Stmt\InlineHTML) {
             return NodeTraverser::DONT_TRAVERSE_CHILDREN;
         }

@@ -24,11 +24,11 @@ class StripCommentTest extends RepresenterTest
         $this->assertRepresentation(
             $code,
             <<<'EOF'
-        function fn0()
-        {
-            return "Hello World!";
-        }
-        EOF,
+            function fn0()
+            {
+                return 'Hello World!';
+            }
+            EOF,
             '{"fn0":"helloworld"}',
         );
     }
