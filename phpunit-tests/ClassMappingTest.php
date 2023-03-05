@@ -20,7 +20,7 @@ class ClassMappingTest extends RepresenterTest
         {
         }
         $v0 = new C0();
-        CODE, '{"C0":"HelloWorld","v0":"a"}');
+        CODE, '{"C0":"helloworld","v0":"a"}');
     }
 
     public function testAnonymousClassMapping(): void
@@ -36,5 +36,21 @@ class ClassMappingTest extends RepresenterTest
         {
         };
         CODE, '{"v0":"a"}');
+    }
+
+    public function testCaseInsensitiveClass(): void
+    {
+        $code = <<<'CODE'
+            <?php
+            class A {}
+            new a();
+            CODE;
+
+        $this->assertRepresentation($code, <<<'CODE'
+        class C0
+        {
+        }
+        new C0();
+        CODE, '{"C0":"a"}');
     }
 }

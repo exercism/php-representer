@@ -79,6 +79,8 @@ class Mapping
 
     public function addClass(string $name): string
     {
+        // TRANSFORM: Class names are case-insensitive in PHP
+        $name = mb_strtolower($name);
         if (! isset($this->invertedClassMapping[$name])) {
             $stableName                        = self::CLASS_PREFIX . count($this->invertedClassMapping);
             $this->invertedClassMapping[$name] = $stableName;
