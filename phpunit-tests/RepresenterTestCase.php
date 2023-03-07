@@ -12,7 +12,7 @@ abstract class RepresenterTestCase extends TestCase
 {
     protected function assertRepresentation(string $code, string $expectedRepresentation, string $expectedMapping): void
     {
-        $mapping     = new Mapping();
+        $mapping = new Mapping();
         $representer = new FilesRepresenter($mapping);
 
         $result = $representer->represent($code);
@@ -33,10 +33,10 @@ abstract class RepresenterTestCase extends TestCase
         string $mappingAJson,
         string $mappingBJson,
     ): void {
-        $mappingA     = new Mapping();
+        $mappingA = new Mapping();
         $representerA = new FilesRepresenter($mappingA);
 
-        $mappingB     = new Mapping();
+        $mappingB = new Mapping();
         $representerB = new FilesRepresenter($mappingB);
 
         $resultA = $representerA->represent($codeA);

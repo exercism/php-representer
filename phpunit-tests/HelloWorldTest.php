@@ -21,7 +21,7 @@ class HelloWorldTest extends RepresenterTestCase
             CODE;
 
         $mapping = new Mapping();
-        $result  = (new FilesRepresenter($mapping))->represent($code);
+        $result = (new FilesRepresenter($mapping))->represent($code);
         $this->assertEquals(<<<'EOF'
         function fn0()
         {
