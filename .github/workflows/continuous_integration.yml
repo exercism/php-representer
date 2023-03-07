@@ -12,7 +12,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
-          tools: composer
+          tools: composer, infection
           coverage: pcov
 
       - name: Get Composer Cache Directory
@@ -30,3 +30,4 @@ jobs:
       - run: composer lint
       - run: composer phpstan
       - run: composer test
+      - run: infection

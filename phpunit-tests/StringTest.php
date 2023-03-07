@@ -133,13 +133,13 @@ class StringTest extends RepresenterTestCase
     {
         $code = <<<'CODE'
             <?php
-            'test' . 'test' . 'test';
+            'testA' . 'testB' . 'testC';
             CODE;
 
         $this->assertRepresentation(
             $code,
             <<<'EOF'
-            'testtesttest';
+            'testAtestBtestC';
             EOF,
             '{}',
         );
@@ -149,13 +149,13 @@ class StringTest extends RepresenterTestCase
     {
         $code = <<<'CODE'
             <?php
-            'test' . ('test' . 'test');
+            'testA' . ('testB' . 'testC');
             CODE;
 
         $this->assertRepresentation(
             $code,
             <<<'EOF'
-            'testtesttest';
+            'testAtestBtestC';
             EOF,
             '{}',
         );

@@ -16,8 +16,6 @@ use Throwable;
 
 use function assert;
 
-use const PHP_EOL;
-
 /**
  * Represent PHP code as a string using and hydrating the provided Mapping.
  */
@@ -41,7 +39,7 @@ class FilesRepresenter
         } catch (Throwable $e) {
             // Parsing error is not an exception, we should still be able to represent the code
             $this->logger->error(
-                'Unable to parse code: {{code}}' . PHP_EOL . 'exception: {{exception}}',
+                'Unable to parse code: {code}exception: {exception}',
                 ['code' => $code, 'exception' => $e],
             );
 

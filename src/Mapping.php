@@ -15,6 +15,7 @@ use function mb_strtolower;
 
 use const JSON_FORCE_OBJECT;
 use const JSON_THROW_ON_ERROR;
+use const JSON_UNESCAPED_UNICODE;
 
 class Mapping
 {
@@ -47,7 +48,7 @@ class Mapping
 
         ksort($mapping);
 
-        return json_encode($mapping, JSON_FORCE_OBJECT | JSON_THROW_ON_ERROR);
+        return json_encode($mapping, JSON_FORCE_OBJECT | JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
     }
 
     public function addFunction(string $name): string
