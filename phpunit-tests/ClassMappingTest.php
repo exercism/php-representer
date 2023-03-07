@@ -40,10 +40,11 @@ class ClassMappingTest extends RepresenterTestCase
 
     public function testCaseInsensitiveClass(): void
     {
+        // ΤΑΞΗ (uppercase) and ταξη (lowercase) means "class" in Greek
         $code = <<<'CODE'
             <?php
-            class A {}
-            new a();
+            class ΤΑΞΗ {}
+            new ταξη();
             CODE;
 
         $this->assertRepresentation($code, <<<'CODE'
@@ -51,6 +52,6 @@ class ClassMappingTest extends RepresenterTestCase
         {
         }
         new C0();
-        CODE, '{"C0":"a"}');
+        CODE, '{"C0":"ταξη"}');
     }
 }

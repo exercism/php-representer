@@ -202,8 +202,6 @@ class NodeVisitor extends NodeVisitorAbstract
             $this->normalizeExit($node);
         } elseif ($node instanceof Double) {
             $this->normalizeCastDouble($node);
-        } elseif ($node instanceof InlineHTML) {
-            return NodeTraverser::DONT_TRAVERSE_CHILDREN;
         }
 
         return null;

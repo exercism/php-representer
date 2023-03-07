@@ -67,10 +67,11 @@ class FunctionMappingTest extends RepresenterTestCase
 
     public function testCaseInsensitiveFunctions(): void
     {
+        // ΛΕΙΤΟΥΡΓΙΑ (uppercase) and λειτουργια (lowercase) means "function" in Greek
         $code = <<<'CODE'
             <?php
-            function A() {}
-            a();
+            function ΛΕΙΤΟΥΡΓΙΑ() {}
+            λειτουργια();
             CODE;
 
         $this->assertRepresentation(
@@ -81,7 +82,7 @@ class FunctionMappingTest extends RepresenterTestCase
             }
             fn0();
             CODE,
-            '{"fn0":"a"}',
+            '{"fn0":"λειτουργια"}',
         );
     }
 
@@ -98,6 +99,28 @@ class FunctionMappingTest extends RepresenterTestCase
             function_exists();
             CODE,
             '{}',
+        );
+    }
+
+    public function testDoNotReplaceNameAsExpression(): void
+    {
+        $code = <<<'CODE'
+            <?php
+            function a() {}
+            $a = 'a';
+            $a();
+            CODE;
+
+        $this->assertRepresentation(
+            $code,
+            <<<'CODE'
+            function fn0()
+            {
+            }
+            $v0 = 'a';
+            $v0();
+            CODE,
+            '{"fn0":"a","v0":"a"}',
         );
     }
 }

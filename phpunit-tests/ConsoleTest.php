@@ -39,9 +39,16 @@ class ConsoleTest extends RepresenterTestCase
 
         $this->commandTester->assertCommandIsSuccessful();
         $display = $this->commandTester->getDisplay();
-        $this->assertStringContainsString('Exercise slug: hello-world', $display);
-        $this->assertStringContainsString('[debug] AST Before normalization', $display);
-        $this->assertStringContainsString('[debug] AST After normalization', $display);
+        $this->assertStringContainsString('[info] Exercise slug: hello-world', $display);
+        $this->assertMatchesRegularExpression(
+            '#\[info] Solution directory: /.*/phpunit-tests/data/normal-input#',
+            $display,
+        );
+        $this->assertMatchesRegularExpression('#\[info] Output directory: /.*/phpunit-tests/data/output#', $display);
+        $this->assertStringContainsString('[info] .meta/config.json: Solutions files: solution.php', $display);
+        $this->assertStringContainsString('[info] Representing solution file: solution.php', $display);
+        $this->assertStringContainsString('[debug] AST Before normalization: array(', $display);
+        $this->assertStringContainsString('[debug] AST After normalization: array(', $display);
     }
 
     public function testConsoleMissingArgument(): void
@@ -128,7 +135,8 @@ class ConsoleTest extends RepresenterTestCase
 
         $this->assertEquals(0, $this->commandTester->getStatusCode());
         $display = $this->commandTester->getDisplay();
-        $this->assertStringContainsString('Unable to parse code:', $display);
+        $this->assertStringContainsString('[error] Unable to parse code: <?php', $display);
+        $this->assertStringContainsString('exception: PhpParser\Error', $display);
     }
 
     public function testDryRun(): void

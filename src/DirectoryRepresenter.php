@@ -36,7 +36,7 @@ class DirectoryRepresenter
             throw new RuntimeException('.meta/config.json: Unable to read file');
         }
 
-        $config = json_decode($configJson, true, 512, JSON_THROW_ON_ERROR);
+        $config = json_decode($configJson, true, flags: JSON_THROW_ON_ERROR);
 
         if (! is_array($config) || ! isset($config['files']['solution']) || ! is_array($config['files']['solution'])) {
             throw new RuntimeException('.meta/config.json: missing or invalid `files.solution` key');
