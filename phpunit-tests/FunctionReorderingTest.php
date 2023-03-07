@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
-class FunctionReorderingTest extends RepresenterTest
+class FunctionReorderingTest extends RepresenterTestCase
 {
     public function testFunctionReordering(): void
     {

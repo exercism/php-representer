@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
-class StableSpacingTest extends RepresenterTest
+class StableSpacingTest extends RepresenterTestCase
 {
     public function testStableSpacing(): void
     {

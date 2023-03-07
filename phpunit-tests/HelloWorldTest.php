@@ -7,7 +7,7 @@ namespace App\Tests;
 use App\FilesRepresenter;
 use App\Mapping;
 
-class HelloWorldTest extends RepresenterTest
+class HelloWorldTest extends RepresenterTestCase
 {
     public function testHelloWorld(): void
     {
