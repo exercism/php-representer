@@ -21,7 +21,7 @@ class Mapping
 {
     private const FUNCTION_PREFIX = 'fn';
     private const VARIABLE_PREFIX = 'v';
-    private const CLASS_PREFIX    = 'C';
+    private const CLASS_PREFIX = 'C';
 
     /** @var array<string, string> */
     private array $invertedFunctionMapping = [];
@@ -61,7 +61,7 @@ class Mapping
         }
 
         if (! isset($this->invertedFunctionMapping[$name])) {
-            $stableName                           = self::FUNCTION_PREFIX . count($this->invertedFunctionMapping);
+            $stableName = self::FUNCTION_PREFIX . count($this->invertedFunctionMapping);
             $this->invertedFunctionMapping[$name] = $stableName;
         }
 
@@ -71,7 +71,7 @@ class Mapping
     public function addVariable(string $name): string
     {
         if (! isset($this->invertedVariableMapping[$name])) {
-            $stableName                           = self::VARIABLE_PREFIX . count($this->invertedVariableMapping);
+            $stableName = self::VARIABLE_PREFIX . count($this->invertedVariableMapping);
             $this->invertedVariableMapping[$name] = $stableName;
         }
 
@@ -83,7 +83,7 @@ class Mapping
         // TRANSFORM: Class names are case-insensitive in PHP
         $name = mb_strtolower($name);
         if (! isset($this->invertedClassMapping[$name])) {
-            $stableName                        = self::CLASS_PREFIX . count($this->invertedClassMapping);
+            $stableName = self::CLASS_PREFIX . count($this->invertedClassMapping);
             $this->invertedClassMapping[$name] = $stableName;
         }
 

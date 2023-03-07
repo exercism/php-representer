@@ -9,7 +9,7 @@ use PhpParser\NodeTraverser;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter\Standard;
-use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\String\LazyString;
 use Throwable;
@@ -26,9 +26,9 @@ class FilesRepresenter
 
     public function __construct(
         private Mapping $mapping = new Mapping(),
-        private AbstractLogger $logger = new NullLogger(),
+        private LoggerInterface $logger = new NullLogger(),
     ) {
-        $this->parser        = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $this->parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
         $this->prettyPrinter = new Standard();
     }
 
@@ -52,7 +52,7 @@ class FilesRepresenter
             static fn () => 'AST Before normalization: ' . (new NodeDumper())->dump($ast)
         ));
 
-        $visitor   = new NodeVisitor($this->mapping);
+        $visitor = new NodeVisitor($this->mapping);
         $traverser = new NodeTraverser();
         $traverser->addVisitor($visitor);
         $ast = $traverser->traverse($ast);

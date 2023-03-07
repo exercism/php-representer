@@ -124,20 +124,6 @@ class NodeVisitor extends NodeVisitorAbstract
      */
     private function simplifyUselessConcat(Concat $concat): String_|null
     {
-        if ($concat->left instanceof Concat) {
-            $simplified = $this->simplifyUselessConcat($concat->left);
-            if ($simplified !== null) {
-                $concat->left = $simplified;
-            }
-        }
-
-        if ($concat->right instanceof Concat) {
-            $simplified = $this->simplifyUselessConcat($concat->right);
-            if ($simplified !== null) {
-                $concat->right = $simplified;
-            }
-        }
-
         if ($concat->left instanceof String_ && $concat->right instanceof String_) {
             return new String_(
                 $concat->left->value . $concat->right->value,
@@ -194,8 +180,6 @@ class NodeVisitor extends NodeVisitorAbstract
             $this->normalizeString($node);
         } elseif ($node instanceof Encapsed) {
             return $this->normalizeEncapsedString($node);
-        } elseif ($node instanceof Concat) {
-            return $this->simplifyUselessConcat($node);
         } elseif ($node instanceof Array_) {
             $this->normalizeArray($node);
         } elseif ($node instanceof Exit_) {
@@ -212,6 +196,10 @@ class NodeVisitor extends NodeVisitorAbstract
      */
     public function leaveNode(Node $node)
     {
+        if ($node instanceof Concat) {
+            return $this->simplifyUselessConcat($node);
+        }
+
         // TRANSFORM: Remove empty statements from representation
         if ($node instanceof Node\Stmt\Nop) {
             return NodeTraverser::REMOVE_NODE;

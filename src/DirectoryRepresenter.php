@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App;
 
-use Psr\Log\AbstractLogger;
+use League\Flysystem\Filesystem;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 
-use function file_get_contents;
+use function assert;
 use function implode;
 use function is_array;
 use function json_decode;
 
-use const DIRECTORY_SEPARATOR;
 use const JSON_THROW_ON_ERROR;
 use const PHP_EOL;
 
@@ -24,29 +24,27 @@ use const PHP_EOL;
 class DirectoryRepresenter
 {
     public function __construct(
-        private readonly string $solutionDir,
-        private readonly AbstractLogger $logger,
+        private readonly Filesystem $solutionDir,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
     public function represent(): Result
     {
-        $configJson = @file_get_contents($this->solutionDir . '/.meta/config.json');
-        if ($configJson === false) {
-            throw new RuntimeException('.meta/config.json: Unable to read file');
-        }
+        $configJson = $this->solutionDir->read('/.meta/config.json');
 
         $config = json_decode($configJson, true, flags: JSON_THROW_ON_ERROR);
+        assert(is_array($config), 'json_decode(..., true) should return an array');
 
-        if (! is_array($config) || ! isset($config['files']['solution']) || ! is_array($config['files']['solution'])) {
+        if (! isset($config['files']['solution']) || ! is_array($config['files']['solution'])) {
             throw new RuntimeException('.meta/config.json: missing or invalid `files.solution` key');
         }
 
         $solutions = $config['files']['solution'];
         $this->logger->info('.meta/config.json: Solutions files: ' . implode(', ', $solutions));
 
-        $mapping             = new Mapping();
-        $representer         = new FilesRepresenter($mapping, $this->logger);
+        $mapping = new Mapping();
+        $representer = new FilesRepresenter($mapping, $this->logger);
         $filesRepresentation = '';
 
         if (empty($solutions)) {
@@ -56,11 +54,7 @@ class DirectoryRepresenter
         foreach ($solutions as $solution) {
             $this->logger->info('Representing solution file: ' . $solution);
 
-            $solutionPath = $this->solutionDir . DIRECTORY_SEPARATOR . $solution;
-            $code         = @file_get_contents($solutionPath);
-            if ($code === false) {
-                throw new RuntimeException($solutionPath . ': Unable to read file');
-            }
+            $code = $this->solutionDir->read($solution);
 
             $filesRepresentation .= '// file: ' . $solution . PHP_EOL;
             $filesRepresentation .= $representer->represent($code) . PHP_EOL;
