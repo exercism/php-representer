@@ -31,7 +31,7 @@ class FilesRepresenter
         private AbstractLogger $logger = new NullLogger(),
     ) {
         $this->parser        = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
-        $this->prettyPrinter = new NormalizedPrinter();
+        $this->prettyPrinter = new Standard();
     }
 
     public function represent(string $code): string
