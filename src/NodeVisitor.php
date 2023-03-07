@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App;
 
-use LogicException;
 use PhpParser\Node;
+use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\BinaryOp\Concat;
+use PhpParser\Node\Expr\Cast\Double;
+use PhpParser\Node\Expr\Exit_;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\Variable;
@@ -17,6 +19,7 @@ use PhpParser\Node\Scalar\EncapsedStringPart;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Function_;
+use PhpParser\Node\Stmt\InlineHTML;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 
@@ -90,29 +93,9 @@ class NodeVisitor extends NodeVisitorAbstract
     /**
      * TRANSFORM: All strings are single quotes
      */
-    private function normalizeString(String_ $string): String_|null
+    private function normalizeString(String_ $string): void
     {
-        switch ($string->getAttribute('kind')) {
-            case String_::KIND_NOWDOC:
-                $string->setAttribute('kind', String_::KIND_SINGLE_QUOTED);
-
-                return $string;
-
-            case String_::KIND_SINGLE_QUOTED:
-                return null;
-
-            case String_::KIND_HEREDOC:
-                $string->setAttribute('kind', String_::KIND_SINGLE_QUOTED);
-
-                return $string;
-
-            case String_::KIND_DOUBLE_QUOTED:
-                $string->setAttribute('kind', String_::KIND_SINGLE_QUOTED);
-
-                return $string;
-        }
-
-        throw new LogicException('Invalid string kind: `' . $string->getAttribute('kind') . '`.');
+        $string->setAttribute('kind', String_::KIND_SINGLE_QUOTED);
     }
 
     /**
@@ -166,6 +149,30 @@ class NodeVisitor extends NodeVisitorAbstract
     }
 
     /**
+     * TRANSFORM: Normalize array
+     */
+    private function normalizeArray(Array_ $node): void
+    {
+        $node->setAttribute('kind', Array_::KIND_SHORT);
+    }
+
+    /**
+     * TRANSFORM: `die` is an alias for `exit`
+     */
+    private function normalizeExit(Exit_ $node): void
+    {
+        $node->setAttribute('kind', Exit_::KIND_EXIT);
+    }
+
+    /**
+     * TRANSFORM: `(double)`, `(float)` and `(real)` are all aliases for `(double)`
+     */
+    private function normalizeCastDouble(Double $node): void
+    {
+        $node->setAttribute('kind', Double::KIND_DOUBLE);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function enterNode(Node $node)
@@ -184,12 +191,18 @@ class NodeVisitor extends NodeVisitorAbstract
         } elseif ($node instanceof New_) {
             $this->replaceNewClassName($node);
         } elseif ($node instanceof String_) {
-            return $this->normalizeString($node);
+            $this->normalizeString($node);
         } elseif ($node instanceof Encapsed) {
             return $this->normalizeEncapsedString($node);
         } elseif ($node instanceof Concat) {
             return $this->simplifyUselessConcat($node);
-        } elseif ($node instanceof Node\Stmt\InlineHTML) {
+        } elseif ($node instanceof Array_) {
+            $this->normalizeArray($node);
+        } elseif ($node instanceof Exit_) {
+            $this->normalizeExit($node);
+        } elseif ($node instanceof Double) {
+            $this->normalizeCastDouble($node);
+        } elseif ($node instanceof InlineHTML) {
             return NodeTraverser::DONT_TRAVERSE_CHILDREN;
         }
 
@@ -207,7 +220,7 @@ class NodeVisitor extends NodeVisitorAbstract
         }
 
         // TRANSFORM: Remove inline HTML from representation
-        if ($node instanceof Node\Stmt\InlineHTML) {
+        if ($node instanceof InlineHTML) {
             return NodeTraverser::REMOVE_NODE;
         }
 
