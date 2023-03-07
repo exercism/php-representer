@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
-class StripCommentTest extends RepresenterTest
+class StripCommentTest extends RepresenterTestCase
 {
     public function testStripComment(): void
     {

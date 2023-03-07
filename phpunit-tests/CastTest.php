@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
-class CastTest extends RepresenterTest
+class CastTest extends RepresenterTestCase
 {
     public function testFloatCast(): void
     {

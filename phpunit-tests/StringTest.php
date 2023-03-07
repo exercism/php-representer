@@ -11,7 +11,7 @@ use function var_export;
  *
  * We will convert all strings to singlequotes as reported by `var_export()`
  */
-class StringTest extends RepresenterTest
+class StringTest extends RepresenterTestCase
 {
     public function testDoubleQuotes(): void
     {

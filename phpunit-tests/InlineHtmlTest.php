@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
-class InlineHtmlTest extends RepresenterTest
+class InlineHtmlTest extends RepresenterTestCase
 {
     public function testInlineHtml(): void
     {

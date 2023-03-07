@@ -8,7 +8,7 @@ use App\FilesRepresenter;
 use App\Mapping;
 use PHPUnit\Framework\TestCase;
 
-abstract class RepresenterTest extends TestCase
+abstract class RepresenterTestCase extends TestCase
 {
     protected function assertRepresentation(string $code, string $expectedRepresentation, string $expectedMapping): void
     {

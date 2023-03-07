@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
-class ExitAndDieTest extends RepresenterTest
+class ExitAndDieTest extends RepresenterTestCase
 {
     public function testExitAndDie(): void
     {

@@ -2,7 +2,7 @@
 build/
 vendor/
 .phpcs-cache
-.phpunit.result.cache
+.phpunit.cache/
 tests/*/representation.json
 tests/*/representation.txt
 tests/*/mapping.json

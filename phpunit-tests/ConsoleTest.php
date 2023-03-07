@@ -14,7 +14,7 @@ use function mkdir;
 use function scandir;
 use function shell_exec;
 
-class ConsoleTest extends RepresenterTest
+class ConsoleTest extends RepresenterTestCase
 {
     private CommandTester $commandTester;
 

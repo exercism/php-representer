@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
-class VariableMappingTest extends RepresenterTest
+class VariableMappingTest extends RepresenterTestCase
 {
     public function testVariableMapping(): void
     {

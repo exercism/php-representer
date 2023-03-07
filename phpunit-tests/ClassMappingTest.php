@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
-class ClassMappingTest extends RepresenterTest
+class ClassMappingTest extends RepresenterTestCase
 {
     public function testClassMapping(): void
     {
