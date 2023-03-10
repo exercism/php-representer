@@ -10,7 +10,9 @@ use PhpParser\Node\Expr\BinaryOp\Concat;
 use PhpParser\Node\Expr\Cast\Double;
 use PhpParser\Node\Expr\Exit_;
 use PhpParser\Node\Expr\FuncCall;
+use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\New_;
+use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
@@ -18,6 +20,7 @@ use PhpParser\Node\Scalar\Encapsed;
 use PhpParser\Node\Scalar\EncapsedStringPart;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node\Stmt\InlineHTML;
 use PhpParser\NodeTraverser;
@@ -87,6 +90,49 @@ class NodeVisitor extends NodeVisitorAbstract
         $className = $class->class;
         if ($className instanceof Name) {
             $class->class = new Name($this->mapping->addClass($className->toString()));
+        }
+    }
+
+    /**
+     * TRANSFORM: Replace method name with stable name
+     */
+    private function replaceMethodName(ClassMethod $node): void
+    {
+        // TRANSFORM: Declare everything public
+        $node->flags |= Class_::MODIFIER_PUBLIC;
+        $node->flags &= ~Class_::MODIFIER_PRIVATE;
+        $node->flags &= ~Class_::MODIFIER_PROTECTED;
+        // TRANSFORM: Remove final and readonly modifiers
+        $node->flags &= ~Class_::MODIFIER_FINAL;
+        $node->flags &= ~Class_::MODIFIER_READONLY;
+
+        $node->name = new Identifier($this->mapping->addMethod($node->name->toString()));
+    }
+
+    /**
+     * TRANSFORM: Replace static call name with stable name
+     */
+    private function replaceStaticCallName(StaticCall $node): void
+    {
+        $className = $node->class;
+        if ($className instanceof Name) {
+            $node->class = new Name($this->mapping->addClass($className->toString()));
+        }
+
+        $methodName = $node->name;
+        if ($methodName instanceof Identifier) {
+            $node->name = new Identifier($this->mapping->addMethod($methodName->toString()));
+        }
+    }
+
+    /**
+     * TRANSFORM: Replace method call name with stable name
+     */
+    private function replaceMethodCallName(MethodCall $node): void
+    {
+        $methodName = $node->name;
+        if ($methodName instanceof Identifier) {
+            $node->name = new Identifier($this->mapping->addMethod($methodName->toString()));
         }
     }
 
@@ -186,6 +232,12 @@ class NodeVisitor extends NodeVisitorAbstract
             $this->normalizeExit($node);
         } elseif ($node instanceof Double) {
             $this->normalizeCastDouble($node);
+        } elseif ($node instanceof ClassMethod) {
+            $this->replaceMethodName($node);
+        } elseif ($node instanceof StaticCall) {
+            $this->replaceStaticCallName($node);
+        } elseif ($node instanceof MethodCall) {
+            $this->replaceMethodCallName($node);
         }
 
         return null;

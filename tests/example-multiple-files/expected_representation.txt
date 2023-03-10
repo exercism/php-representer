@@ -2,15 +2,15 @@
 use Helpers;
 class C0
 {
-    public static function isLeapYear($v0)
+    public static function m0($v0)
     {
-        return Helpers::mod($v0, 4) === 0;
+        return C1::m1($v0, 4) === 0;
     }
 }
 // file: Helpers.php
 class C1
 {
-    public static function mod($v1, $v2)
+    public static function m1($v1, $v2)
     {
         return $v1 % $v2;
     }

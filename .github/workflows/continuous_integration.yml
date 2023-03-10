@@ -30,4 +30,4 @@ jobs:
       - run: composer lint
       - run: composer phpstan
       - run: composer test
-      - run: infection
+      - run: infection --min-msi=95 --min-covered-msi=95
