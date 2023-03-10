@@ -22,6 +22,7 @@ class Mapping
     private const FUNCTION_PREFIX = 'fn';
     private const VARIABLE_PREFIX = 'v';
     private const CLASS_PREFIX = 'C';
+    private const METHOD_PREFIX = 'm';
 
     /** @var array<string, string> */
     private array $invertedFunctionMapping = [];
@@ -29,6 +30,8 @@ class Mapping
     private array $invertedVariableMapping = [];
     /** @var array<string, string> */
     private array $invertedClassMapping = [];
+    /** @var array<string, string> */
+    private array $invertedMethodMapping = [];
 
     /** @var array<string, int> Array to search rapidly for internal functions */
     private readonly array $internalFunctions;
@@ -44,6 +47,7 @@ class Mapping
             array_flip($this->invertedFunctionMapping),
             array_flip($this->invertedVariableMapping),
             array_flip($this->invertedClassMapping),
+            array_flip($this->invertedMethodMapping),
         );
 
         ksort($mapping);
@@ -88,5 +92,17 @@ class Mapping
         }
 
         return $this->invertedClassMapping[$name];
+    }
+
+    public function addMethod(string $name): string
+    {
+        // TRANSFORM: Method names are case-insensitive in PHP
+        $name = mb_strtolower($name);
+        if (! isset($this->invertedMethodMapping[$name])) {
+            $stableName = self::METHOD_PREFIX . count($this->invertedMethodMapping);
+            $this->invertedMethodMapping[$name] = $stableName;
+        }
+
+        return $this->invertedMethodMapping[$name];
     }
 }
