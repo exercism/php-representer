@@ -123,4 +123,47 @@ class FunctionMappingTest extends RepresenterTestCase
             '{"fn0":"a","v0":"a"}',
         );
     }
+
+    public function testReplacesFunctionAliases(): void
+    {
+        $code = <<<'CODE'
+            <?php
+            chop();
+            doubleval();
+            fputs();
+            ini_alter();
+            is_double();
+            is_integer();
+            is_long();
+            is_writeable();
+            join();
+            key_exists();
+            pos();
+            show_source();
+            sizeof();
+            strchr();
+            CODE;
+
+        $this->assertRepresentation(
+            $code,
+            <<<'CODE'
+            rtrim();
+            floatval();
+            fwrite();
+            ini_set();
+            is_float();
+            is_int();
+            is_int();
+            is_writable();
+            implode();
+            array_key_exists();
+            current();
+            highlight_file();
+            count();
+            strstr();
+            CODE,
+            // phpcs:ignore Generic.Files.LineLength -- Not worth splitting into multiple lines
+            '{"array_key_exists":"key_exists","count":"sizeof","current":"pos","floatval":"doubleval","fwrite":"fputs","highlight_file":"show_source","implode":"join","ini_set":"ini_alter","is_float":"is_double","is_int":"is_long","is_writable":"is_writeable","rtrim":"chop","strstr":"strchr"}',
+        );
+    }
 }
