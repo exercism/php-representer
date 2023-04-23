@@ -31,8 +31,8 @@ class VariableMappingTest extends RepresenterTestCase
         $this->assertSameRepresentationWithMapping(
             $codeA,
             $codeB,
-            '{"fn0":"helloworld","v0":"a"}',
-            '{"fn0":"helloworld","v0":"b"}',
+            '{"fn0":"helloWorld","v0":"a"}',
+            '{"fn0":"helloWorld","v0":"b"}',
         );
     }
 }

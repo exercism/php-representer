@@ -48,7 +48,7 @@ class FunctionMappingTest extends RepresenterTestCase
             }
             CODE;
 
-        $this->assertSameRepresentationWithMapping($codeA, $codeB, '{"fn0":"helloworlda"}', '{"fn0":"helloworldb"}');
+        $this->assertSameRepresentationWithMapping($codeA, $codeB, '{"fn0":"helloWorldA"}', '{"fn0":"helloWorldB"}');
     }
 
     public function testDoesNotRenameCoreFunctions(): void
@@ -82,7 +82,7 @@ class FunctionMappingTest extends RepresenterTestCase
             }
             fn0();
             CODE,
-            '{"fn0":"λειτουργια"}',
+            '{"fn0":"ΛΕΙΤΟΥΡΓΙΑ"}',
         );
     }
 
@@ -165,5 +165,25 @@ class FunctionMappingTest extends RepresenterTestCase
             // phpcs:ignore Generic.Files.LineLength -- Not worth splitting into multiple lines
             '{"array_key_exists":"key_exists","count":"sizeof","current":"pos","floatval":"doubleval","fwrite":"fputs","highlight_file":"show_source","implode":"join","ini_set":"ini_alter","is_float":"is_double","is_int":"is_long","is_writable":"is_writeable","rtrim":"chop","strstr":"strchr"}',
         );
+    }
+
+    public function testCaseInsensitiveMultipleOccurrences(): void
+    {
+        $code = <<<'CODE'
+            <?php
+            
+            function A() {}
+            a();
+            a();
+            CODE;
+
+        $this->assertRepresentation($code, <<<'CODE'
+        function fn0()
+        {
+        }
+        fn0();
+        fn0();
+        CODE
+            , '{"fn0":"a"}');
     }
 }
