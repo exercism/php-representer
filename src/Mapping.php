@@ -6,7 +6,6 @@ namespace App;
 
 use function array_flip;
 use function array_key_exists;
-use function array_merge;
 use function count;
 use function get_defined_functions;
 use function json_encode;
@@ -24,13 +23,13 @@ class Mapping
     private const CLASS_PREFIX = 'C';
     private const METHOD_PREFIX = 'm';
 
-    /** @var array<string, string> */
+    /** @var array<string, MappingEntry> */
     private array $invertedFunctionMapping = [];
-    /** @var array<string, string> */
+    /** @var array<string, MappingEntry> */
     private array $invertedVariableMapping = [];
-    /** @var array<string, string> */
+    /** @var array<string, MappingEntry> */
     private array $invertedClassMapping = [];
-    /** @var array<string, string> */
+    /** @var array<string, MappingEntry> */
     private array $invertedMethodMapping = [];
 
     /** @var array<string, int> Array to search rapidly for internal functions */
@@ -43,12 +42,22 @@ class Mapping
 
     public function toJson(): string
     {
-        $mapping = array_merge(
-            array_flip($this->invertedFunctionMapping),
-            array_flip($this->invertedVariableMapping),
-            array_flip($this->invertedClassMapping),
-            array_flip($this->invertedMethodMapping),
-        );
+        $mapping = [];
+        foreach ($this->invertedClassMapping as $entry) {
+            $mapping[$entry->getStableName()] = $entry->getMostCommonName();
+        }
+
+        foreach ($this->invertedFunctionMapping as $entry) {
+            $mapping[$entry->getStableName()] = $entry->getMostCommonName();
+        }
+
+        foreach ($this->invertedMethodMapping as $entry) {
+            $mapping[$entry->getStableName()] = $entry->getMostCommonName();
+        }
+
+        foreach ($this->invertedVariableMapping as $entry) {
+            $mapping[$entry->getStableName()] = $entry->getMostCommonName();
+        }
 
         ksort($mapping);
 
@@ -86,56 +95,60 @@ class Mapping
     public function addFunction(string $name): string
     {
         // TRANSFORM: Function names are case-insensitive in PHP
-        $name = mb_strtolower($name);
-        // Do not rename built-in functions except aliased ones, functions_exists() includes user-defined functions
-        if (array_key_exists($name, $this->internalFunctions)) {
-            $unaliasedName = $this->functionAlias($name);
-            if ($unaliasedName !== $name) {
-                $this->invertedFunctionMapping[$name] = $unaliasedName;
+        $lcName = mb_strtolower($name);
+        $entry = $this->invertedFunctionMapping[$lcName] ?? null;
+        if ($entry === null) {
+            // Do not rename built-in functions except aliased ones, functions_exists() includes user-defined functions
+            if (array_key_exists($lcName, $this->internalFunctions)) {
+                $unaliasedName = $this->functionAlias($lcName);
+                if ($unaliasedName === $lcName) {
+                    return $unaliasedName;
+                }
+
+                $stableName = $unaliasedName;
+            } else {
+                $stableName = self::FUNCTION_PREFIX . count($this->invertedFunctionMapping);
             }
 
-            return $unaliasedName;
+            $this->invertedFunctionMapping[$lcName] = $entry = new MappingEntry($stableName);
         }
 
-        if (! isset($this->invertedFunctionMapping[$name])) {
-            $stableName = self::FUNCTION_PREFIX . count($this->invertedFunctionMapping);
-            $this->invertedFunctionMapping[$name] = $stableName;
-        }
+        $entry->addValue($name);
 
-        return $this->invertedFunctionMapping[$name];
+        return $entry->getStableName();
     }
 
     public function addVariable(string $name): string
     {
-        if (! isset($this->invertedVariableMapping[$name])) {
+        $entry = $this->invertedVariableMapping[$name] ?? null;
+        if ($entry === null) {
             $stableName = self::VARIABLE_PREFIX . count($this->invertedVariableMapping);
-            $this->invertedVariableMapping[$name] = $stableName;
+            $this->invertedVariableMapping[$name] = $entry = new MappingEntry($stableName);
+            $entry->addValue($name);
         }
 
-        return $this->invertedVariableMapping[$name];
+        return $entry->getStableName();
     }
 
     public function addClass(string $name): string
     {
         // TRANSFORM: Class names are case-insensitive in PHP
-        $name = mb_strtolower($name);
-        if (! isset($this->invertedClassMapping[$name])) {
-            $stableName = self::CLASS_PREFIX . count($this->invertedClassMapping);
-            $this->invertedClassMapping[$name] = $stableName;
-        }
+        $lcName = mb_strtolower($name);
+        $entry = $this->invertedClassMapping[$lcName]
+            ??= new MappingEntry(self::CLASS_PREFIX . count($this->invertedClassMapping));
+        $entry->addValue($name);
 
-        return $this->invertedClassMapping[$name];
+        return $entry->getStableName();
     }
 
     public function addMethod(string $name): string
     {
         // TRANSFORM: Method names are case-insensitive in PHP
-        $name = mb_strtolower($name);
-        if (! isset($this->invertedMethodMapping[$name])) {
-            $stableName = self::METHOD_PREFIX . count($this->invertedMethodMapping);
-            $this->invertedMethodMapping[$name] = $stableName;
-        }
+        $lcName = mb_strtolower($name);
+        $entry = $this->invertedMethodMapping[$lcName]
+            ??= new MappingEntry(self::METHOD_PREFIX . count($this->invertedMethodMapping));
+        $entry->addValue($name);
 
-        return $this->invertedMethodMapping[$name];
+        return $entry->getStableName();
     }
 }
