@@ -28,7 +28,7 @@ class FilesRepresenter
         private Mapping $mapping = new Mapping(),
         private LoggerInterface $logger = new NullLogger(),
     ) {
-        $this->parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $this->parser = (new ParserFactory())->createForNewestSupportedVersion();
         $this->prettyPrinter = new Standard();
     }
 
@@ -52,9 +52,8 @@ class FilesRepresenter
             static fn () => 'AST Before normalization: ' . (new NodeDumper())->dump($ast)
         ));
 
-        $visitor = new NodeVisitor($this->mapping);
-        $traverser = new NodeTraverser();
-        $traverser->addVisitor($visitor);
+        $visitor = new NormalizeNodeVisitor($this->mapping);
+        $traverser = new NodeTraverser($visitor);
         $ast = $traverser->traverse($ast);
 
         $this->logger->debug(LazyString::fromCallable(

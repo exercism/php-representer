@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
+use PhpParser\Modifiers;
 use PhpParser\Node;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\BinaryOp\Concat;
@@ -15,15 +16,15 @@ use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Identifier;
+use PhpParser\Node\InterpolatedStringPart;
 use PhpParser\Node\Name;
-use PhpParser\Node\Scalar\Encapsed;
-use PhpParser\Node\Scalar\EncapsedStringPart;
+use PhpParser\Node\Scalar\InterpolatedString;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node\Stmt\InlineHTML;
-use PhpParser\NodeTraverser;
+use PhpParser\NodeVisitor;
 use PhpParser\NodeVisitorAbstract;
 
 use function array_map;
@@ -34,7 +35,7 @@ use function is_string;
 /**
  * Apply transformations to normalize the AST
  */
-class NodeVisitor extends NodeVisitorAbstract
+class NormalizeNodeVisitor extends NodeVisitorAbstract
 {
     public function __construct(private Mapping $mapping)
     {
@@ -99,12 +100,12 @@ class NodeVisitor extends NodeVisitorAbstract
     private function replaceMethodName(ClassMethod $node): void
     {
         // TRANSFORM: Declare everything public
-        $node->flags |= Class_::MODIFIER_PUBLIC;
-        $node->flags &= ~Class_::MODIFIER_PRIVATE;
-        $node->flags &= ~Class_::MODIFIER_PROTECTED;
+        $node->flags |= Modifiers::PUBLIC;
+        $node->flags &= ~Modifiers::PRIVATE;
+        $node->flags &= ~Modifiers::PROTECTED;
         // TRANSFORM: Remove final and readonly modifiers
-        $node->flags &= ~Class_::MODIFIER_FINAL;
-        $node->flags &= ~Class_::MODIFIER_READONLY;
+        $node->flags &= ~Modifiers::FINAL;
+        $node->flags &= ~Modifiers::READONLY;
 
         $node->name = new Identifier($this->mapping->addMethod($node->name->toString()));
     }
@@ -147,17 +148,17 @@ class NodeVisitor extends NodeVisitorAbstract
     /**
      * TRANSFORM: All encapsed strings are single quotes concatenation
      */
-    private function normalizeEncapsedString(Encapsed $string): Node
+    private function normalizeInterpolatedString(InterpolatedString $string): Node
     {
         $parts = array_map(
-            static fn (Node $part) => $part instanceof EncapsedStringPart
+            static fn (Node $part) => $part instanceof InterpolatedStringPart
                 ? new String_($part->value, ['kind' => String_::KIND_SINGLE_QUOTED])
                 : $part,
             $string->parts,
         );
 
         $left = array_shift($parts);
-        assert($left !== null, 'Encapsed string had 0 part.');
+        assert($left !== null, 'Interpolated string had 0 part.');
         while ($right = array_shift($parts)) {
             $left = new Concat($left, $right);
         }
@@ -224,8 +225,8 @@ class NodeVisitor extends NodeVisitorAbstract
             $this->replaceNewClassName($node);
         } elseif ($node instanceof String_) {
             $this->normalizeString($node);
-        } elseif ($node instanceof Encapsed) {
-            return $this->normalizeEncapsedString($node);
+        } elseif ($node instanceof InterpolatedString) {
+            return $this->normalizeInterpolatedString($node);
         } elseif ($node instanceof Array_) {
             $this->normalizeArray($node);
         } elseif ($node instanceof Exit_) {
@@ -254,12 +255,12 @@ class NodeVisitor extends NodeVisitorAbstract
 
         // TRANSFORM: Remove empty statements from representation
         if ($node instanceof Node\Stmt\Nop) {
-            return NodeTraverser::REMOVE_NODE;
+            return NodeVisitor::REMOVE_NODE;
         }
 
         // TRANSFORM: Remove inline HTML from representation
         if ($node instanceof InlineHTML) {
-            return NodeTraverser::REMOVE_NODE;
+            return NodeVisitor::REMOVE_NODE;
         }
 
         return null;

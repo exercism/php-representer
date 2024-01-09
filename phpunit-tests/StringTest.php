@@ -31,14 +31,15 @@ class StringTest extends RepresenterTestCase
 
     public function testDoubleQuotesWithEscapes(): void
     {
+        // We use `\\\\(\n)` because `\\(\n)` will be simplified to `\(\n)` by PhpParser
         $code = <<<'CODE'
             <?php
-            "\n\r\n\t\n\v\n\e\n\f\n\\\n\$\n\"\n\377\n\x26\n\u2665";
+            "\n\r\n\t\n\v\n\e\n\f\n\\\\\n\$\n\"\n\377\n\x26\n\u{2665}";
             CODE;
 
         $this->assertRepresentation(
             $code,
-            var_export("\n\r\n\t\n\v\n\e\n\f\n\\\n\$\n\"\n\377\n\x26\n\u2665", true) . ';',
+            var_export("\n\r\n\t\n\v\n\e\n\f\n\\\\\n\$\n\"\n\377\n\x26\n\u{2665}", true) . ';',
             '{}',
         );
     }
