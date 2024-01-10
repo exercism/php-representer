@@ -62,7 +62,7 @@ class DirectoryRepresenter
 
         return new Result(
             $filesRepresentation,
-            '{"version":1}',
+            '{"version":2}',
             $mapping->toJson(),
         );
     }
