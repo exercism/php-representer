@@ -33,4 +33,5 @@ mkdir -p "${output_dir}"
 
 echo "${slug}: creating representation..."
 
+# Create the representation for the solution
 /usr/local/bin/php /opt/representer/main.php "$@"

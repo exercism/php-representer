@@ -17,38 +17,17 @@ exit_code=0
 for test_dir in tests/*; do
     test_dir_name=$(basename "${test_dir}")
     test_dir_path=$(realpath "${test_dir}")
-    representation_file_path="${test_dir_path}/representation.txt"
-    expected_representation_file_path="${test_dir_path}/expected_representation.txt"
-    mapping_file_path="${test_dir_path}/mapping.json"    
-    expected_mapping_file_path="${test_dir_path}/expected_mapping.json"
-    expected_error_file_path="${test_dir_path}/expected_representation.txt"
-    expect_error="${test_dir_path}/.expect-error"
 
     bin/run.sh "${test_dir_name}" "${test_dir_path}" "${test_dir_path}"
-    test_exit_code=$?
 
-    if [[ -f "${expect_error}" ]]; then
-        if [[ $test_exit_code -eq 0 ]]; then
-            echo 'Expected non-zero exit code'
+    for file in representation.txt representation.json mapping.json; do
+        expected_file="expected_${file}"
+        echo "${test_dir_name}: comparing ${file} to ${expected_file}"
+
+        if ! diff "${test_dir_path}/${file}" "${test_dir_path}/${expected_file}"; then
             exit_code=1
         fi
-    else
-        echo "${test_dir_name}: comparing representation.txt to expected_representation.txt"
-        diff "${representation_file_path}" "${expected_representation_file_path}"
-
-        if [ $? -ne 0 ]; then
-            echo "FAILED"
-            exit_code=1
-        fi
-
-        echo "${test_dir_name}: comparing mapping.json to expected_mapping.json"
-        diff "${mapping_file_path}" "${expected_mapping_file_path}"
-
-        if [ $? -ne 0 ]; then
-            echo "FAILED"
-            exit_code=1
-        fi
-    fi
+    done
 done
 
 exit ${exit_code}
