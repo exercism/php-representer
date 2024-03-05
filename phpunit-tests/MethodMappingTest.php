@@ -37,10 +37,10 @@ class MethodMappingTest extends RepresenterTestCase
         $code = <<<'CODE'
             <?php
             class A {
-                public static function ΜΕΘΟΔΟΣ() {}
+                public static function AΜΕΘΟΔΟΣ() {}
             }
             
-            A::μεθοδοσ();
+            A::aΜΕΘΟΔΟΣ();
             CODE;
 
         $this->assertRepresentation($code, <<<'CODE'
@@ -51,7 +51,7 @@ class MethodMappingTest extends RepresenterTestCase
             }
         }
         C0::m0();
-        CODE, '{"C0":"A","m0":"ΜΕΘΟΔΟΣ"}');
+        CODE, '{"C0":"A","m0":"AΜΕΘΟΔΟΣ"}');
     }
 
     public function testPublicModifier(): void

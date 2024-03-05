@@ -70,8 +70,8 @@ class FunctionMappingTest extends RepresenterTestCase
         // ΛΕΙΤΟΥΡΓΙΑ (uppercase) and λειτουργια (lowercase) means "function" in Greek
         $code = <<<'CODE'
             <?php
-            function ΛΕΙΤΟΥΡΓΙΑ() {}
-            λειτουργια();
+            function AΛΕΙΤΟΥΡΓΙΑ() {}
+            aΛΕΙΤΟΥΡΓΙΑ();
             CODE;
 
         $this->assertRepresentation(
@@ -82,7 +82,7 @@ class FunctionMappingTest extends RepresenterTestCase
             }
             fn0();
             CODE,
-            '{"fn0":"ΛΕΙΤΟΥΡΓΙΑ"}',
+            '{"fn0":"AΛΕΙΤΟΥΡΓΙΑ"}',
         );
     }
 

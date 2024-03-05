@@ -10,7 +10,7 @@ use function count;
 use function get_defined_functions;
 use function json_encode;
 use function ksort;
-use function mb_strtolower;
+use function strtolower;
 
 use const JSON_FORCE_OBJECT;
 use const JSON_THROW_ON_ERROR;
@@ -95,7 +95,7 @@ class Mapping
     public function addFunction(string $name): string
     {
         // TRANSFORM: Function names are case-insensitive in PHP
-        $lcName = mb_strtolower($name);
+        $lcName = strtolower($name);
         $entry = $this->invertedFunctionMapping[$lcName] ?? null;
         if ($entry === null) {
             // Do not rename built-in functions except aliased ones, functions_exists() includes user-defined functions
@@ -133,7 +133,7 @@ class Mapping
     public function addClass(string $name): string
     {
         // TRANSFORM: Class names are case-insensitive in PHP
-        $lcName = mb_strtolower($name);
+        $lcName = strtolower($name);
         $entry = $this->invertedClassMapping[$lcName]
             ??= new MappingEntry(self::CLASS_PREFIX . count($this->invertedClassMapping));
         $entry->addValue($name);
@@ -144,7 +144,7 @@ class Mapping
     public function addMethod(string $name): string
     {
         // TRANSFORM: Method names are case-insensitive in PHP
-        $lcName = mb_strtolower($name);
+        $lcName = strtolower($name);
         $entry = $this->invertedMethodMapping[$lcName]
             ??= new MappingEntry(self::METHOD_PREFIX . count($this->invertedMethodMapping));
         $entry->addValue($name);
