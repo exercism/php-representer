@@ -13,7 +13,7 @@
 # ./bin/run-tests-in-docker.sh
 
 # Build the Docker image
-docker build --rm -t exercism/representer .
+docker build --rm -t exercism/php-representer .
 
 # Run the Docker image using the settings mimicking the production environment
 docker run \
@@ -25,4 +25,4 @@ docker run \
     --mount type=tmpfs,destination=/tmp \
     --workdir /opt/representer \
     --entrypoint /opt/representer/bin/run-tests.sh \
-    exercism/representer
+    exercism/php-representer

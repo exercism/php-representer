@@ -27,7 +27,7 @@ jobs:
           context: .
           push: false
           load: true
-          tags: exercism/representer
+          tags: exercism/php-representer
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
