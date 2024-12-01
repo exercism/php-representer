@@ -81,13 +81,52 @@ class ApplicationTest extends RepresenterTestCase
         $this->assertStringContainsString('.meta/config.json: `files.solution` key is empty', $display);
     }
 
-    public function testConfigInvalidFilesSolutionValue(): void
+    public function testConfigInvalidFilesValueNotArray(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('#^\.meta/config\.json: missing or invalid `files\.solution` key$#');
+        $input = new InMemoryFilesystemAdapter();
+        $inputFs = new Filesystem($input);
+        $inputFs->write('.meta/config.json', '{"files":true}');
+        $output = new InMemoryFilesystemAdapter();
+
+        $application = new Application();
+        $application->represent($inputFs, new Filesystem($output), new NullLogger());
+    }
+
+    public function testConfigInvalidFilesMissingSolution(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('#^\.meta/config\.json: missing or invalid `files\.solution` key$#');
+        $input = new InMemoryFilesystemAdapter();
+        $inputFs = new Filesystem($input);
+        $inputFs->write('.meta/config.json', '{"files":{}}');
+        $output = new InMemoryFilesystemAdapter();
+
+        $application = new Application();
+        $application->represent($inputFs, new Filesystem($output), new NullLogger());
+    }
+
+    public function testConfigInvalidFilesSolutionValueNotArray(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessageMatches('#^\.meta/config\.json: missing or invalid `files\.solution` key$#');
         $input = new InMemoryFilesystemAdapter();
         $inputFs = new Filesystem($input);
         $inputFs->write('.meta/config.json', '{"files":{"solution":true}}');
+        $output = new InMemoryFilesystemAdapter();
+
+        $application = new Application();
+        $application->represent($inputFs, new Filesystem($output), new NullLogger());
+    }
+
+    public function testConfigInvalidFilesSolutionValueNotArrayOfString(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('#^\.meta/config\.json: missing or invalid `files\.solution` key$#');
+        $input = new InMemoryFilesystemAdapter();
+        $inputFs = new Filesystem($input);
+        $inputFs->write('.meta/config.json', '{"files":{"solution":[true]}}');
         $output = new InMemoryFilesystemAdapter();
 
         $application = new Application();
