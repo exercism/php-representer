@@ -11,6 +11,7 @@ use RuntimeException;
 use function assert;
 use function implode;
 use function is_array;
+use function is_string;
 use function json_decode;
 
 use const JSON_THROW_ON_ERROR;
@@ -32,16 +33,7 @@ class DirectoryRepresenter
     public function represent(): Result
     {
         $configJson = $this->solutionDir->read('/.meta/config.json');
-
-        $config = json_decode($configJson, true, flags: JSON_THROW_ON_ERROR);
-        assert(is_array($config), 'json_decode(..., true) should return an array');
-
-        if (! isset($config['files']['solution']) || ! is_array($config['files']['solution'])) {
-            throw new RuntimeException('.meta/config.json: missing or invalid `files.solution` key');
-        }
-
-        $solutions = $config['files']['solution'];
-        $this->logger->info('.meta/config.json: Solutions files: ' . implode(', ', $solutions));
+        $solutions = $this->parseSolutions($configJson);
 
         $mapping = new Mapping();
         $representer = new FilesRepresenter($mapping, $this->logger);
@@ -65,5 +57,43 @@ class DirectoryRepresenter
             '{"version": 2}',
             $mapping->toJson(),
         );
+    }
+
+    /** @return string[] */
+    private function parseSolutions(string $configJson): array
+    {
+        $config = json_decode($configJson, true, flags: JSON_THROW_ON_ERROR);
+        assert(is_array($config), 'json_decode(..., true) should return an array');
+        if (
+            ! isset($config['files'])
+            || ! is_array($config['files'])
+            || ! isset($config['files']['solution'])
+            || ! is_array($config['files']['solution'])
+            || ! $this->isArrayOfString($config['files']['solution'])
+        ) {
+            throw new RuntimeException('.meta/config.json: missing or invalid `files.solution` key');
+        }
+
+        $solutions = $config['files']['solution'];
+
+        $this->logger->info('.meta/config.json: Solutions files: ' . implode(', ', $solutions));
+
+        return $solutions;
+    }
+
+    /**
+     * @param mixed[] $array
+     *
+     * @phpstan-assert-if-true string[] $array
+     */
+    private function isArrayOfString(array $array): bool
+    {
+        foreach ($array as $element) {
+            if (! is_string($element)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
