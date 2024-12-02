@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
+
 use function var_export;
 
 /**
@@ -46,15 +49,16 @@ class StringTest extends RepresenterTestCase
 
     public function testDoubleQuotesEncapsulation(): void
     {
+        // `${a}` is deprecated since PHP8.2
         $code = <<<'CODE'
             <?php
-            "encapsed $a or ${a}.";
+            "encapsed $a or {$a} or ${a}.";
             CODE;
 
         $this->assertRepresentation(
             $code,
             <<<'EOF'
-            'encapsed ' . $v0 . ' or ' . $v0 . '.';
+            'encapsed ' . $v0 . ' or ' . $v0 . ' or ' . $v0 . '.';
             EOF,
             '{"v0":"a"}',
         );
@@ -130,35 +134,56 @@ class StringTest extends RepresenterTestCase
         );
     }
 
-    public function testUselessConcatenation(): void
+    /** @return Generator<string, array{string, string}, void, void> */
+    public static function uselessConcatenationProvider(): iterable
     {
-        $code = <<<'CODE'
+        yield 'basic' => ["'testA' . 'testB' . 'testC';", "'testAtestBtestC';"];
+        yield 'right' => ["'testA' . ('testB' . 'testC');", "'testAtestBtestC';"];
+        yield 'left' => ["('testA' . 'testB') . 'testC';", "'testAtestBtestC';"];
+        yield 'both' => ["('testA' . 'testB') . ('testC' . 'testD');", "'testAtestBtestCtestD';"];
+    }
+
+    #[DataProvider('uselessConcatenationProvider')]
+    public function testUselessConcatenation(string $input, string $output): void
+    {
+        $code = <<<CODE
             <?php
-            'testA' . 'testB' . 'testC';
+            $input
             CODE;
 
         $this->assertRepresentation(
             $code,
-            <<<'EOF'
-            'testAtestBtestC';
+            <<<EOF
+            $output
             EOF,
             '{}',
         );
     }
 
-    public function testUselessRightConcatenation(): void
+    /** @return Generator<string, array{string, string}, void, void> */
+    public static function uselessInterpolatedConcatenationProvider(): iterable
     {
-        $code = <<<'CODE'
+        yield 'left left' => ['"{$c}testA" . \'testB\';', '$v0 . \'testAtestB\';'];
+        yield 'left right' => ['"testA{$c}" . \'testB\';', '\'testA\' . $v0 . \'testB\';'];
+        yield 'right left' => ['\'testA\' . "{$c}testB";', '\'testA\' . $v0 . \'testB\';'];
+        yield 'right right' => ['\'testA\' . "testB{$c}";', '\'testAtestB\' . $v0;'];
+        yield 'left left and right right' => ['"{$c}testA" . "testB{$c}";', '$v0 . \'testAtestB\' . $v0;'];
+    }
+
+    #[DataProvider('uselessInterpolatedConcatenationProvider')]
+    public function testUselessInterpolatedConcatenation(string $input, string $output): void
+    {
+        $code = <<<CODE
             <?php
-            'testA' . ('testB' . 'testC');
+            $input
             CODE;
 
         $this->assertRepresentation(
             $code,
-            <<<'EOF'
-            'testAtestBtestC';
+            <<<EOF
+            $output
             EOF,
-            '{}',
+            '{"v0":"c"}',
         );
     }
 }

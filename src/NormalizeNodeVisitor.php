@@ -28,8 +28,11 @@ use PhpParser\NodeVisitor;
 use PhpParser\NodeVisitorAbstract;
 
 use function array_map;
+use function array_push;
 use function array_shift;
+use function array_splice;
 use function assert;
+use function count;
 use function is_string;
 
 /**
@@ -151,9 +154,7 @@ class NormalizeNodeVisitor extends NodeVisitorAbstract
     private function normalizeInterpolatedString(InterpolatedString $string): Node
     {
         $parts = array_map(
-            static fn (Node $part) => $part instanceof InterpolatedStringPart
-                ? new String_($part->value, ['kind' => String_::KIND_SINGLE_QUOTED])
-                : $part,
+            static fn (Node $part) => $part instanceof InterpolatedStringPart ? new String_($part->value) : $part,
             $string->parts,
         );
 
@@ -169,16 +170,59 @@ class NormalizeNodeVisitor extends NodeVisitorAbstract
     /**
      * TRANSFORM: Simplify useless concat such as `'a' . 'b'` => `'ab'`
      */
-    private function simplifyUselessConcat(Concat $concat): String_|null
+    private function simplifyUselessConcat(Concat $concat): String_|Concat
     {
-        if ($concat->left instanceof String_ && $concat->right instanceof String_) {
-            return new String_(
-                $concat->left->value . $concat->right->value,
-                ['kind' => String_::KIND_SINGLE_QUOTED],
-            );
+        // 1. Flatten Concat-tree to an array of nodes: Concat('0', Concat('1', $a)) => ['0','1',$a]
+        $nodes = $this->unwrapConcat($concat);
+        // 2. Merge consecutive String_: ['0','1',$a,'2','3',$b,'4','5'] => ['01',$a,'23',$b,'45']
+        $index = count($nodes) - 1;
+        while ($index > 0) {
+            $left = $nodes[$index - 1];
+            $right = $nodes[$index];
+            if ($left instanceof String_ && $right instanceof String_) {
+                array_splice($nodes, $index - 1, 2, [new String_($left->value . $right->value)]);
+            }
+
+            $index--;
         }
 
-        return null;
+        // 3. Re-build a Concat-tree, left-based associativity to avoid extra-parentheses:
+        // ['01',$a,'23'] => Concat(Concat('01', $a), '23')
+        $node = array_shift($nodes);
+        assert($node !== null, 'Concat has at least 1 node');
+        while ($right = array_shift($nodes)) {
+            $node = new Concat($node, $right);
+        }
+
+        assert(
+            $node instanceof String_ || $node instanceof Concat,
+            'Either everything was collapsed to a singled String_ or we have a top-level Concat remaining',
+        );
+
+        return $node;
+    }
+
+    /**
+     * Unwrap a tree of Concat to a flat array of nodes
+     *
+     * @return list<Node\Expr>
+     */
+    private function unwrapConcat(Concat $concat): array
+    {
+        $nodes = [];
+        if ($concat->left instanceof Concat) {
+            array_push($nodes, ...$this->unwrapConcat($concat->left));
+        } else {
+            $nodes[] = $concat->left;
+        }
+
+        if ($concat->right instanceof Concat) {
+            array_push($nodes, ...$this->unwrapConcat($concat->right));
+        } else {
+            $nodes[] = $concat->right;
+        }
+
+        return $nodes;
     }
 
     /**
