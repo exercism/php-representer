@@ -5,7 +5,7 @@
     "type": "project",
     "license": "MIT",
     "require": {
-        "php": "^8.1",
+        "php": "^8.3",
         "league/flysystem": "^3.0",
         "league/flysystem-memory": "^3.0",
         "nikic/php-parser": "^5.0",
