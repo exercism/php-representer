@@ -49,7 +49,7 @@ class FilesRepresenter
         assert($ast !== null, 'Ast should not be null. Check parser\'s `$errorHandler`.');
 
         $this->logger->debug(LazyString::fromCallable(
-            static fn () => 'AST Before normalization: ' . (new NodeDumper())->dump($ast)
+            static fn () => 'AST Before normalization: ' . (new NodeDumper())->dump($ast),
         ));
 
         $visitor = new NormalizeNodeVisitor($this->mapping);
@@ -57,7 +57,7 @@ class FilesRepresenter
         $ast = $traverser->traverse($ast);
 
         $this->logger->debug(LazyString::fromCallable(
-            static fn () => 'AST After normalization: ' . (new NodeDumper())->dump($ast)
+            static fn () => 'AST After normalization: ' . (new NodeDumper())->dump($ast),
         ));
 
         return $this->prettyPrinter->prettyPrint($ast);

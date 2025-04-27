@@ -18,10 +18,10 @@ use const JSON_UNESCAPED_UNICODE;
 
 class Mapping
 {
-    private const FUNCTION_PREFIX = 'fn';
-    private const VARIABLE_PREFIX = 'v';
-    private const CLASS_PREFIX = 'C';
-    private const METHOD_PREFIX = 'm';
+    private const string PREFIX_FUNCTION = 'fn';
+    private const string PREFIX_VARIABLE = 'v';
+    private const string PREFIX_CLASS = 'C';
+    private const string PREFIX_METHOD = 'm';
 
     /** @var array<string, MappingEntry> */
     private array $invertedFunctionMapping = [];
@@ -107,7 +107,7 @@ class Mapping
 
                 $stableName = $unaliasedName;
             } else {
-                $stableName = self::FUNCTION_PREFIX . count($this->invertedFunctionMapping);
+                $stableName = self::PREFIX_FUNCTION . count($this->invertedFunctionMapping);
             }
 
             $this->invertedFunctionMapping[$lcName] = $entry = new MappingEntry($stableName);
@@ -122,7 +122,7 @@ class Mapping
     {
         $entry = $this->invertedVariableMapping[$name] ?? null;
         if ($entry === null) {
-            $stableName = self::VARIABLE_PREFIX . count($this->invertedVariableMapping);
+            $stableName = self::PREFIX_VARIABLE . count($this->invertedVariableMapping);
             $this->invertedVariableMapping[$name] = $entry = new MappingEntry($stableName);
             $entry->addValue($name);
         }
@@ -135,7 +135,7 @@ class Mapping
         // TRANSFORM: Class names are case-insensitive in PHP
         $lcName = strtolower($name);
         $entry = $this->invertedClassMapping[$lcName]
-            ??= new MappingEntry(self::CLASS_PREFIX . count($this->invertedClassMapping));
+            ??= new MappingEntry(self::PREFIX_CLASS . count($this->invertedClassMapping));
         $entry->addValue($name);
 
         return $entry->getStableName();
@@ -146,7 +146,7 @@ class Mapping
         // TRANSFORM: Method names are case-insensitive in PHP
         $lcName = strtolower($name);
         $entry = $this->invertedMethodMapping[$lcName]
-            ??= new MappingEntry(self::METHOD_PREFIX . count($this->invertedMethodMapping));
+            ??= new MappingEntry(self::PREFIX_METHOD . count($this->invertedMethodMapping));
         $entry->addValue($name);
 
         return $entry->getStableName();
