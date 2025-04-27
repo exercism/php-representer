@@ -21,6 +21,7 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Scalar\InterpolatedString;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\ClassConst;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node\Stmt\InlineHTML;
@@ -250,6 +251,14 @@ class NormalizeNodeVisitor extends NodeVisitorAbstract
     }
 
     /**
+     * TRANSFORM: remove class const type
+     */
+    private function removeClassConstType(ClassConst $node): void
+    {
+        $node->type = null;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function enterNode(Node $node)
@@ -283,6 +292,8 @@ class NormalizeNodeVisitor extends NodeVisitorAbstract
             $this->replaceStaticCallName($node);
         } elseif ($node instanceof MethodCall) {
             $this->replaceMethodCallName($node);
+        } elseif ($node instanceof ClassConst) {
+            $this->removeClassConstType($node);
         }
 
         return null;
