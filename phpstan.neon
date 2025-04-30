@@ -3,6 +3,9 @@ includes:
 
 parameters:
     level: max
+    paths:
+        - main.php
+        - src/
+        - phpunit-tests/
     excludePaths:
-        - tests/
-        - phpunit-tests/data
+        - phpunit-tests/data/
