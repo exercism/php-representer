@@ -20,6 +20,6 @@ updates:
     labels:
       - 'x:size/tiny'
     groups:
-      github-actions:
+      composer:
         patterns:
           - '*'
