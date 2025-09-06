@@ -39,4 +39,55 @@ class CastTest extends RepresenterTestCase
 
         $this->assertSameRepresentation($codeA, $codeB);
     }
+
+    public function testBooleanCast(): void
+    {
+        $codeA = <<<'CODE'
+            <?php
+            
+            $a = (boolean) true;
+            CODE;
+
+        $codeB = <<<'CODE'
+            <?php
+            
+            $a = (bool) true;
+            CODE;
+
+        $this->assertSameRepresentation($codeA, $codeB);
+    }
+
+    public function testIntegerCast(): void
+    {
+        $codeA = <<<'CODE'
+            <?php
+            
+            $a = (integer) true;
+            CODE;
+
+        $codeB = <<<'CODE'
+            <?php
+            
+            $a = (int) true;
+            CODE;
+
+        $this->assertSameRepresentation($codeA, $codeB);
+    }
+
+    public function testBinaryCast(): void
+    {
+        $codeA = <<<'CODE'
+            <?php
+            
+            $a = (binary) true;
+            CODE;
+
+        $codeB = <<<'CODE'
+            <?php
+            
+            $a = (string) true;
+            CODE;
+
+        $this->assertSameRepresentation($codeA, $codeB);
+    }
 }
