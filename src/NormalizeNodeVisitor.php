@@ -8,7 +8,10 @@ use PhpParser\Modifiers;
 use PhpParser\Node;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\BinaryOp\Concat;
+use PhpParser\Node\Expr\Cast\Bool_;
 use PhpParser\Node\Expr\Cast\Double;
+use PhpParser\Node\Expr\Cast\Int_;
+use PhpParser\Node\Expr\Cast\String_ as CastString_;
 use PhpParser\Node\Expr\Exit_;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\MethodCall;
@@ -243,11 +246,35 @@ class NormalizeNodeVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * TRANSFORM: `(double)`, `(float)` and `(real)` are all aliases for `(double)`
+     * TRANSFORM: `(double)` and `(real)` are aliases of the `(float)` cast
      */
     private function normalizeCastDouble(Double $node): void
     {
         $node->setAttribute('kind', Double::KIND_DOUBLE);
+    }
+
+    /**
+     * TRANSFORM: `(boolean)` is an alias of the `(bool)` cast
+     */
+    private function normalizeCastBool(Bool_ $node): void
+    {
+        $node->setAttribute('kind', Bool_::KIND_BOOL);
+    }
+
+    /**
+     * TRANSFORM: `(integer)` is an alias of the `(int)` cast
+     */
+    private function normalizeCastInt(Int_ $node): void
+    {
+        $node->setAttribute('kind', Int_::KIND_INT);
+    }
+
+    /**
+     * TRANSFORM: `(binary)` is an alias of the `(string)` cast
+     */
+    private function normalizeCastString(CastString_ $node): void
+    {
+        $node->setAttribute('kind', CastString_::KIND_STRING);
     }
 
     /**
@@ -286,6 +313,12 @@ class NormalizeNodeVisitor extends NodeVisitorAbstract
             $this->normalizeExit($node);
         } elseif ($node instanceof Double) {
             $this->normalizeCastDouble($node);
+        } elseif ($node instanceof Bool_) {
+            $this->normalizeCastBool($node);
+        } elseif ($node instanceof Int_) {
+            $this->normalizeCastInt($node);
+        } elseif ($node instanceof CastString_) {
+            $this->normalizeCastString($node);
         } elseif ($node instanceof ClassMethod) {
             $this->replaceMethodName($node);
         } elseif ($node instanceof StaticCall) {
