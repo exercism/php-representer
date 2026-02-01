@@ -7,8 +7,6 @@ namespace App;
 use function array_count_values;
 use function array_key_first;
 use function arsort;
-use function assert;
-use function is_string;
 
 class MappingEntry
 {
@@ -33,9 +31,7 @@ class MappingEntry
     {
         $values = array_count_values($this->names);
         arsort($values);
-        $mostCommonName = array_key_first($values);
-        assert(is_string($mostCommonName));
 
-        return $mostCommonName;
+        return array_key_first($values);
     }
 }
