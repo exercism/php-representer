@@ -11,7 +11,7 @@ RUN /usr/bin/composer install \
     --classmap-authoritative \
     --working-dir=/opt/representer
 
-FROM php:8.4.21-cli-alpine3.23@sha256:4f4fc56fe4ba7b7d241c371eda011b27ca4f3b25bf2a37956ee06e966777d696
+FROM php:8.5.11-cli-alpine3.23@sha256:1e608501594039b39768dfee78edb47c61599606d5b81ed133937363c61f5703
 
 COPY --from=builder /opt/representer /opt/representer
 
