@@ -12,6 +12,7 @@ updates:
       github-actions:
         patterns:
           - "*"
+
   # Keep dependencies for Composer up-to-date
   - package-ecosystem: composer
     directory: /
@@ -29,3 +30,9 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    labels:
+      - x:size/tiny
+    groups:
+      docker:
+        patterns:
+          - "*"
